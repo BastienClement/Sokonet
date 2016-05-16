@@ -1,0 +1,15 @@
+@startuml
+
+hide footbox
+
+participant aReceiver
+participant aClient
+participant aCommand
+participant anInvoker
+
+aClient -> aCommand : new ConcreteCommand(aReceiver)
+aClient -> anInvoker : storeCommand(aCommand)
+anInvoker -> aCommand : execute()
+aCommand -> aReceiver : action()
+
+@enduml

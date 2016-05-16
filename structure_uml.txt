@@ -1,0 +1,29 @@
+@startuml
+
+hide members
+
+class Client
+class Invoker
+abstract Command {
+    {abstract} execute()
+}
+class Receiver { 
+    action() 
+}
+class ConcreteCommand {
+    execute()
+}
+
+show Receiver methods
+show Command methods
+show ConcreteCommand methods
+
+Client --> Receiver
+Client ..> ConcreteCommand
+ConcreteCommand "- receiver" --> Receiver
+Command <|-- ConcreteCommand
+Invoker o--> Command
+
+note right of ConcreteCommand : receiver->action();
+
+@enduml
