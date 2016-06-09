@@ -1,4 +1,4 @@
-package heig.mcr.sokonet;
+package sokonet;
 
 public interface Game {
 	void keyPressed(KeyEvent event);

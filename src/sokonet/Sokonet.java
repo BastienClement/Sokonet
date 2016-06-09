@@ -1,7 +1,7 @@
-package heig.mcr.sokonet;
+package sokonet;
 
-import heig.mcr.sokonet.game.Sokoban;
-import heig.mcr.sokonet.telnet.TelnetGameServer;
+import sokonet.game.Sokoban;
+import sokonet.telnet.TelnetGameServer;
 
 public class Sokonet {
 	public static void main(String... args) {

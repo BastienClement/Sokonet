@@ -1,9 +1,8 @@
-package heig.mcr.sokonet.telnet;
+package sokonet.telnet;
 
-import heig.mcr.sokonet.Display;
-import heig.mcr.sokonet.Game;
-import heig.mcr.sokonet.Key;
-import heig.mcr.sokonet.KeyEvent;
+import sokonet.Game;
+import sokonet.Key;
+import sokonet.KeyEvent;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,18 +11,18 @@ import java.io.UncheckedIOException;
 import java.net.Socket;
 import java.util.function.Function;
 
-import static heig.mcr.sokonet.telnet.TelnetOpcode.*;
+import static sokonet.telnet.TelnetOpcode.*;
 
 class TelnetHandler implements Runnable {
 	private Socket socket;
-	private Function<Display, Game> factory;
+	private Function<? super TelnetDisplay, Game> factory;
 
 	private InputStream in;
 	private OutputStream out;
 	private TelnetDisplay display;
 	private Game game;
 
-	TelnetHandler(Socket socket, Function<Display, Game> factory) throws IOException {
+	TelnetHandler(Socket socket, Function<? super TelnetDisplay, Game> factory) throws IOException {
 		this.socket = socket;
 		this.factory = factory;
 
@@ -61,8 +60,6 @@ class TelnetHandler implements Runnable {
 						// ASCII code 13 is always followed by code 0, ignore
 						in.read();
 				}
-
-				System.out.println(code);
 
 				Key key;
 				boolean shift = false;

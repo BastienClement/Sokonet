@@ -1,7 +1,7 @@
-package heig.mcr.sokonet.telnet;
+package sokonet.telnet;
 
-import heig.mcr.sokonet.Display;
-import heig.mcr.sokonet.Game;
+import sokonet.Game;
+import sokonet.ansi.AnsiDisplay;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -9,15 +9,15 @@ import java.net.ServerSocket;
 import java.util.function.Function;
 
 public class TelnetGameServer {
-	private Function<Display, Game> factory;
+	private Function<? super TelnetDisplay, Game> factory;
 	private int port;
 	private Thread thread;
 
-	public static TelnetGameServer bind(Function<Display, Game> factory, int port) {
+	public static TelnetGameServer bind(Function<? super AnsiDisplay, Game> factory, int port) {
 		return new TelnetGameServer(factory, port);
 	}
 
-	private TelnetGameServer(Function<Display, Game> factory, int port) {
+	private TelnetGameServer(Function<? super TelnetDisplay, Game> factory, int port) {
 		this.factory = factory;
 		this.port = port;
 		this.thread = new Thread(this::run);

@@ -1,4 +1,4 @@
-package heig.mcr.sokonet;
+package sokonet;
 
 @SuppressWarnings("WeakerAccess")
 public class KeyEvent {
