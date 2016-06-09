@@ -65,7 +65,17 @@ class TelnetHandler implements Runnable {
 				boolean shift = false;
 				boolean ctrl = false;
 
-				if (code >= 1 && code <= 26) {
+				if (code == 9) {
+					key = Key.TAB;
+				} else if (code == 13) {
+					key = Key.ENTER;
+				} else if (code == 27) {
+					key = Key.ESC;
+				} else if (code == 32) {
+					key = Key.SPACE;
+				} else if (code == 127) {
+					key = Key.BACKSPACE;
+				} else if (code >= 1 && code <= 26) {
 					key = Key.forCode(code + 96);
 					ctrl = true;
 				} else if (code >= 65 && code <= 90) {

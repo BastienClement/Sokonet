@@ -4,26 +4,32 @@ import sokonet.ansi.Attribute;
 import sokonet.ansi.AnsiDisplay;
 
 class Renderer {
+	private Sokoban game;
 	private AnsiDisplay display;
 
-	private String statusText = "Hello world";
+	private String statusText = "Hello, world!";
+	private String statusRightText = "Sokonet 1.0";
 	private Attribute[] statusAttributes = new Attribute[] { Attribute.WhiteBg, Attribute.Black };
 
-	Renderer(AnsiDisplay display) {
+	Renderer(Sokoban game, AnsiDisplay display) {
 		this.display = display;
 		sync();
 	}
 
 	private void drawStatus() {
-		int status_row = display.height() - 1;
-		display.setAttribute(statusAttributes);
-		display.setCursor(status_row, 2);
-		display.write(' ');
-		display.write(statusText);
-		display.clearLine(AnsiDisplay.ClearLineDirection.RIGHT);
-		display.setCursor(status_row, display.width());
-		display.setAttribute(Attribute.Reset);
-		display.write(' ');
+		display.atomically(() -> {
+			int status_row = display.height() - 1;
+			display.setAttribute(statusAttributes);
+			display.setCursor(status_row, 2);
+			display.write(' ');
+			display.write(statusText);
+			display.clearLine(AnsiDisplay.ClearLineDirection.RIGHT);
+			display.setCursor(status_row, display.width() - statusRightText.length() - 1);
+			display.write(statusRightText);
+			display.write(' ');
+			display.setAttribute(Attribute.Reset);
+			display.write(' ');
+		});
 	}
 
 	public void setStatusAttribtues(Attribute... attribtues) {
@@ -36,13 +42,18 @@ class Renderer {
 		drawStatus();
 	}
 
-	public void sync() {
-		display.setAttribute(Attribute.Reset);
-		display.hideCursor();
-		display.clear();
-
+	public void setStatusRight(String text) {
+		statusRightText = text;
 		drawStatus();
+	}
 
-		display.flush();
+	public void sync() {
+		display.atomically(() -> {
+			display.setAttribute(Attribute.Reset);
+			display.hideCursor();
+			display.clear();
+			drawStatus();
+			display.flush();
+		});
 	}
 }

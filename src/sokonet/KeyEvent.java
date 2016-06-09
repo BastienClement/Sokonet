@@ -13,4 +13,10 @@ public class KeyEvent {
 		this.shift = shift;
 		this.ctrl = ctrl;
 	}
+
+	@Override
+	public String toString() {
+		String prefix = ctrl ? "CTRL-" : shift ? "SHIFT-" : "";
+		return prefix + (key == Key.UNKNOWN ? code : key).toString();
+	}
 }
