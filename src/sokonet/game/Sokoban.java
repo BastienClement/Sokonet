@@ -56,6 +56,7 @@ public class Sokoban implements Game {
 		if (display.width() < 80 || display.height() < 24) {
 			display.setAttribute(Attribute.BlackBackground, Attribute.WhiteColor);
 			display.clear();
+			display.setCursor(1, 1);
 			display.write("Please resize your terminal window to at least 80x24 characters.");
 			return;
 		}
