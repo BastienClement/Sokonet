@@ -2,6 +2,7 @@ package sokonet.game;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 class Level {
 	/**
@@ -19,15 +20,15 @@ class Level {
 		private boolean target = false;
 		private boolean outside = false;
 
-		public Content getContent() {
+		Content getContent() {
 			return content;
 		}
 
-		public boolean isTarget() {
+		boolean isTarget() {
 			return target;
 		}
 
-		public boolean isOutside() {
+		boolean isOutside() {
 			return outside;
 		}
 	}
@@ -35,6 +36,7 @@ class Level {
 	private int index;
 	private Cell[][] cells;
 	private int px, py;
+	private Stack<Command> rewind = new Stack<>();
 
 	/**
 	 *
@@ -58,11 +60,12 @@ class Level {
 	void scanOutsides() {
 		for (Cell[] col : cells) {
 			for (int i = 0; i < col.length; i++) {
-				if (col[i].getContent() == Content.Wall) break;
+				if (col[i].content == Content.Wall) break;
 				col[i].outside = true;
 			}
+
 			for (int i = col.length - 1; i > 0; i--) {
-				if (col[i].getContent() == Content.Wall) break;
+				if (col[i].content == Content.Wall) break;
 				col[i].outside = true;
 			}
 
@@ -148,6 +151,28 @@ class Level {
 
 	/**
 	 *
+	 */
+	void rewind() {
+		if (!rewind.empty()) {
+			rewind.pop().execute();
+		}
+	}
+
+	/**
+	 *
+	 * @return
+	 */
+	boolean done() {
+		for (Cell[] col : cells) {
+			for (Cell cell : col) {
+				if (cell.target && cell.content != Content.Crate) return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 *
 	 * @return
 	 */
 	List<Point> up() {
@@ -190,6 +215,13 @@ class Level {
 		int x = px + dx;
 		int y = py + dy;
 
+		Command undo = () -> {
+			cells[px][py].content = Content.Void;
+			px -= dx;
+			py -= dy;
+			cells[px][py].content = Content.Player;
+		};
+
 		switch (cells[x][y].content) {
 			case Wall:
 				throw new IllegalStateException("Invalid move!");
@@ -198,10 +230,14 @@ class Level {
 				int xx = x + dx;
 				int yy = y + dy;
 				if (cells[xx][yy].content != Content.Void) {
-					throw new IllegalStateException("You cannot push this crate!");
+					throw new IllegalStateException("Something is blocking this crate!");
 				} else {
 					cells[xx][yy].content = Content.Crate;
 					altered.add(new Point(xx, yy));
+					undo = undo.andThen(() -> {
+						cells[xx][yy].content = Content.Void;
+						cells[xx - dx][yy - dy].content = Content.Crate;
+					});
 				}
 				break;
 		}
@@ -215,6 +251,7 @@ class Level {
 		px = x;
 		py = y;
 
+		rewind.push(undo);
 		return altered;
 	}
 }

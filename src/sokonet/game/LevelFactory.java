@@ -94,6 +94,8 @@ public abstract class LevelFactory {
 
 					Point pt = new Point(x, y);
 					switch (c) {
+						case '+':
+							targets.add(pt);
 						case '@':
 							if (player != null) throw new IllegalStateException();
 							player = pt;
@@ -117,7 +119,7 @@ public abstract class LevelFactory {
 							break;
 
 						default:
-							throw new IllegalArgumentException("Unknown item: " + c);
+							throw new IllegalArgumentException("Unknown item: " + ((char) c));
 					}
 				}
 			}

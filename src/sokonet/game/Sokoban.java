@@ -63,6 +63,10 @@ public class Sokoban implements Game {
 				List<Point> delta = move.apply(level);
 				renderer.setStatus("");
 				renderer.drawLevel(delta);
+				if (level.done()) {
+					selectLevel(levelIndex + 1);
+					renderer.setStatus("Congratulation, you solved level #" + levelIndex);
+				}
 			} catch (IllegalStateException ex) {
 				renderer.setStatus(ex.getMessage());
 			}
@@ -92,8 +96,12 @@ public class Sokoban implements Game {
 		binds.set(Key.S, performMovement("DOWN", Level::down));
 		binds.set(Key.D, performMovement("RIGHT", Level::right));
 		binds.set(Key.R, offsetLevel("RESET", 0));
-		binds.set(Key.P, offsetLevel("RESET", 1));
-		binds.set(Key.O, offsetLevel("RESET", -1));
+		binds.set(Key.P, offsetLevel("NEXT", 1));
+		binds.set(Key.O, offsetLevel("PREV", -1));
+		binds.set(Key.Z, Command.named("REWIND", () -> {
+			level.rewind();
+			renderer.sync();
+		}));
 		return binds;
 	}
 

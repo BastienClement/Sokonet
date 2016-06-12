@@ -2,7 +2,7 @@ package sokonet.game;
 
 import java.util.Arrays;
 
-public class Macro implements Command {
+class Macro implements Command {
 	public static Macro of(Command... commands) {
 		return new Macro(Arrays.copyOf(commands, commands.length));
 	}
@@ -15,13 +15,6 @@ public class Macro implements Command {
 
 	@Override
 	public void execute() {
-		for (Command command : commands) {
-			command.execute();
-		}
-	}
-
-	@Override
-	public void undo() {
 		for (Command command : commands) {
 			command.execute();
 		}

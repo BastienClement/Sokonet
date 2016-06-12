@@ -4,16 +4,11 @@ package sokonet.game;
  * A command that can be executed.
  */
 @FunctionalInterface
-public interface Command {
+interface Command {
 	/**
 	 * TODO
 	 */
 	void execute();
-
-	/**
-	 * Undo the command, if available.
-	 */
-	default void undo() {}
 
 	/**
 	 * TODO
