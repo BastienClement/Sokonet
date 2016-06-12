@@ -1,86 +1,65 @@
 package sokonet.game;
 
-import sokonet.Display;
 import sokonet.Game;
-import sokonet.Key;
-import sokonet.KeyEvent;
+import sokonet.KeyPress;
 import sokonet.ansi.AnsiDisplay;
 import sokonet.ansi.Attribute;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
 
 public class Sokoban implements Game {
-	private enum KeyState {
-		Normal, Recording, Bind
-	}
-
-	private Display display;
+	private AnsiDisplay display;
 	private Renderer renderer;
+	private KeyBindings bindings;
 
-	private KeyState keyState = KeyState.Normal;
-	private List<KeyEvent> macro;
-
+	/**
+	 * Constructs a new Sokoban game.
+	 *
+	 * @param display the display to use for this game
+	 */
 	public Sokoban(AnsiDisplay display) {
 		this.display = display;
 		this.renderer = new Renderer(this, display);
+		this.bindings = new KeyBindings();
 	}
 
+	/**
+	 * Constructs the default command, invoked if no commands are bound to the
+	 * key pressed by the user. The default action is to display a notice in
+	 * the status bar.
+	 *
+	 * @param key the key pressed by the user
+	 * @return a supplier of a command that display the key in the status bar
+	 */
+	private Supplier<Command> undefinedCommand(KeyPress key) {
+		return () -> () -> renderer.setStatus("Unknown command: " + key.toString());
+	}
+
+	/**
+	 * Handles key presses. The current KeyBindings object will be used to
+	 * transform the key press to a command that can be executed. If no
+	 * commands are bound to the key, a notice is displayed in the status bar.
+	 *
+	 * @param key the key pressed by the user
+	 */
 	@Override
-	public void keyPressed(KeyEvent event) {
-		switch (keyState) {
-			case Recording:
-				if (event.key == Key.M) {
-					renderer.setStatus("-- PRESS KEY FOR MACRO --");
-					keyState = KeyState.Bind;
-				} else {
-					macro.add(event);
-					renderer.setStatus(macro.stream().map(KeyEvent::toString).collect(Collectors.joining(" > ")));
-				}
-				break;
-
-			case Bind:
-				switch (event.key) {
-					case W:
-					case A:
-					case S:
-					case D:
-					case M:
-						renderer.setStatus("Binding macro to this key is not allowed");
-						break;
-
-					default:
-						renderer.setStatus("Macro bound to " + event.toString());
-
-					case ESC:
-						if (event.key == Key.ESC) renderer.setStatus("Macro binding canceled");
-						renderer.setStatusAttribtues(Attribute.WhiteBg, Attribute.Black);
-						keyState = KeyState.Normal;
-						macro = null;
-				}
-				break;
-
-			case Normal:
-				renderer.setStatusRight(event.toString());
-				switch (event.key) {
-					case M:
-						macro = new ArrayList<>();
-						renderer.setStatusAttribtues(Attribute.RedBg, Attribute.White);
-						renderer.setStatus("-- RECORDING MACRO --");
-						renderer.setStatusRight("");
-						keyState = KeyState.Recording;
-						break;
-
-					default:
-						renderer.setStatus("Unknown command: " + event.toString());
-				}
-				break;
-		}
+	public void keyPressed(KeyPress key) {
+		bindings.get(key).orElseGet(undefinedCommand(key)).execute();
 	}
 
+	/**
+	 * Handles display size changes.
+	 * The game display must be at least 80x24 character.
+	 */
 	@Override
 	public void displaySizeChanged() {
+		if (display.width() < 80 || display.height() < 24) {
+			display.setAttribute(Attribute.BlackBackground, Attribute.WhiteColor);
+			display.clear();
+			display.write("Please resize your terminal window to at least 80x24 characters.");
+			return;
+		}
+
 		renderer.setStatusRight(display.width() + " x " + display.height());
 		renderer.sync();
 	}

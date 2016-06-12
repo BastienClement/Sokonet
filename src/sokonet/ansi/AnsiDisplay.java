@@ -8,13 +8,28 @@ import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
+/**
+ * A display that supports ANSI control sequences and output buffering.
+ */
 public abstract class AnsiDisplay implements Display {
+	private static String ESCAPE = "\u001B";
+
 	private StringBuilder buffer;
 	private final OutputStream out;
+
+	/**
+	 * Constructs a new ANSI display handler using the given output stream
+	 * to writes control sequences.
+	 *
+	 * @param out the output stream used to output commands
+	 */
 	public AnsiDisplay(OutputStream out) {
 		this.out = out;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void write(int b) {
 		try {
@@ -28,6 +43,9 @@ public abstract class AnsiDisplay implements Display {
 		}
 	}
 
+	/**
+	 * Writes a slice of a byte array on the display.
+	 */
 	@Override
 	public void write(byte[] bytes, int offset, int length) {
 		try {
@@ -41,6 +59,9 @@ public abstract class AnsiDisplay implements Display {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void flush() {
 		try {
@@ -50,45 +71,94 @@ public abstract class AnsiDisplay implements Display {
 		}
 	}
 
+	/**
+	 * Sets the cursor to the given position. Top-left position is 1:1.
+	 *
+	 * @param x the x coordinate
+	 * @param y the y coordinate
+	 */
+	public void setCursor(int x, int y) {
+		write(ESCAPE + "[" + x + ";" + y + "H");
+	}
+
+	/**
+	 * Hides the cursor.
+	 */
+	public void hideCursor() {
+		write(ESCAPE + "[?25l");
+	}
+
+	/**
+	 * Shows the cursor.
+	 */
+	public void showCursor() {
+		write(ESCAPE + "[?25h");
+	}
+
+	/**
+	 * Save the cursor position.
+	 */
+	public void saveCursor() {
+		write(ESCAPE + "s");
+	}
+
+	/**
+	 * Restores the cursor to the previously saved position.
+	 */
+	public void restoreCursor() {
+		write(ESCAPE + "u");
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void clear() {
-		write("\u001B[2J");
+		clear(ClearScreenDirection.BOTH);
 	}
 
-	public void setCursor(int x, int y) {
-		write("\u001B[" + x + ";" + y + "H");
+	/**
+	 * Clears the current line.
+	 */
+	public void clearLine() {
+		clear(ClearLineDirection.BOTH);
 	}
 
-	public void hideCursor() {
-		write("\u001B[?25l");
+	/**
+	 * Clears the current line in the given direction.
+	 *
+	 * @param direction the direction in which the line should be cleared
+	 */
+	public void clear(ClearLineDirection direction) {
+		write(ESCAPE + "[" + direction.ordinal() + "K");
 	}
 
-	public void showCursor() {
-		write("\u001B[?25h");
+	/**
+	 * Clears the screen in the given direction.
+	 *
+	 * @param direction the direction in which the screen should be cleared
+	 */
+	public void clear(ClearScreenDirection direction) {
+		write(ESCAPE + "[" + direction.ordinal() + "J");
 	}
 
-	public void saveCursor() {
-		write("\u001Bs");
-	}
-
-	public void restoreCursor() {
-		write("\u001Bu");
-	}
-
-	public enum ClearLineDirection { BOTH, LEFT, RIGHT }
-	public void clearLine(ClearLineDirection direction) {
-		switch (direction) {
-			case RIGHT: write("\u001B[0K"); break;
-			case LEFT: write("\u001B[1K"); break;
-			case BOTH: write("\u001B[2K"); break;
-		}
-	}
-
+	/**
+	 * Sets display attributes.
+	 *
+	 * @param attrs the attributes to set
+	 */
 	public void setAttribute(Attribute... attrs) {
-		String codes = Arrays.stream(attrs).map(Attribute::code).map(Object::toString).collect(Collectors.joining(";"));
-		write("\u001B[" + codes + "m");
+		String codes = Arrays.stream(attrs)
+		                     .map(attr -> Integer.toString(attr.code()))
+		                     .collect(Collectors.joining(";"));
+		write(ESCAPE + "[" + codes + "m");
 	}
 
+	/**
+	 * TODO
+	 *
+	 * @param block
+	 */
 	public void atomically(Runnable block) {
 		StringBuilder old = buffer;
 		StringBuilder buf = buffer = new StringBuilder();

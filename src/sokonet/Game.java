@@ -1,6 +1,6 @@
 package sokonet;
 
 public interface Game {
-	void keyPressed(KeyEvent event);
+	void keyPressed(KeyPress event);
 	void displaySizeChanged();
 }

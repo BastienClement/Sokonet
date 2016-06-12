@@ -2,6 +2,8 @@ package sokonet.game;
 
 import sokonet.ansi.Attribute;
 import sokonet.ansi.AnsiDisplay;
+import sokonet.ansi.ClearLineDirection;
+import sokonet.ansi.ClearScreenDirection;
 
 class Renderer {
 	private Sokoban game;
@@ -9,26 +11,48 @@ class Renderer {
 
 	private String statusText = "Hello, world!";
 	private String statusRightText = "Sokonet 1.0";
-	private Attribute[] statusAttributes = new Attribute[] { Attribute.WhiteBg, Attribute.Black };
+	private Attribute[] statusAttributes = new Attribute[] { Attribute.WhiteBackground, Attribute.BlackColor};
 
 	Renderer(Sokoban game, AnsiDisplay display) {
 		this.display = display;
 		sync();
 	}
 
+	private String limit(String in, int length) {
+		if (in.length() > length) {
+			return in.substring(0, length);
+		} else {
+			return in;
+		}
+	}
+
 	private void drawStatus() {
 		display.atomically(() -> {
 			int status_row = display.height() - 1;
+			int status_width = display.width() - 4;
+
+			// Clear the last 3 lines of the screen
+			display.setCursor(status_row - 1, 1);
+			display.setAttribute(Attribute.Reset);
+			display.clear(ClearScreenDirection.DOWN);
+
+			// Left side
 			display.setAttribute(statusAttributes);
 			display.setCursor(status_row, 2);
 			display.write(' ');
-			display.write(statusText);
-			display.clearLine(AnsiDisplay.ClearLineDirection.RIGHT);
-			display.setCursor(status_row, display.width() - statusRightText.length() - 1);
-			display.write(statusRightText);
+			display.write(limit(statusText, status_width));
+			display.clear(ClearLineDirection.RIGHT);
+
+			// Right side
+			display.setCursor(status_row, Math.max(display.width() - statusRightText.length() - 1, 2));
+			display.write(limit(statusRightText, status_width));
 			display.write(' ');
+
+			// Status bar end
 			display.setAttribute(Attribute.Reset);
 			display.write(' ');
+			display.setCursor(status_row + 1, 1);
+			display.clearLine();
 		});
 	}
 

@@ -2,7 +2,8 @@ package sokonet.telnet;
 
 import sokonet.Game;
 import sokonet.Key;
-import sokonet.KeyEvent;
+import sokonet.KeyPress;
+import sokonet.Modifier;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,8 +63,7 @@ class TelnetHandler implements Runnable {
 				}
 
 				Key key;
-				boolean shift = false;
-				boolean ctrl = false;
+				Modifier mod = Modifier.NONE;
 
 				if (code == 9) {
 					key = Key.TAB;
@@ -77,16 +77,16 @@ class TelnetHandler implements Runnable {
 					key = Key.BACKSPACE;
 				} else if (code >= 1 && code <= 26) {
 					key = Key.forCode(code + 96);
-					ctrl = true;
+					mod = Modifier.CTRL;
 				} else if (code >= 65 && code <= 90) {
 					key = Key.forCode(code + 32);
-					shift = true;
+					mod = Modifier.SHIFT;
 				} else {
 					key = Key.forCode(code);
 				}
 
 				if (game == null) throw new IllegalStateException();
-				game.keyPressed(new KeyEvent(key, code, shift, ctrl));
+				game.keyPressed(new KeyPress(key, code, mod));
 			}
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
