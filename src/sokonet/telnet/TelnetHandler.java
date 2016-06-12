@@ -86,7 +86,9 @@ class TelnetHandler implements Runnable {
 				}
 
 				if (game == null) throw new IllegalStateException();
-				game.keyPressed(new KeyPress(key, code, mod));
+				if (key != Key.UNKNOWN) {
+					game.keyPressed(new KeyPress(key, mod));
+				}
 			}
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);

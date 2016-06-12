@@ -4,39 +4,33 @@ import java.util.Objects;
 
 public class KeyPress {
 	private final Key key;
-	private final int code;
-	private final Modifier mod;
+	private final Modifier modifier;
 
-	public KeyPress(Key key, int code, Modifier mod) {
+	public KeyPress(Key key, Modifier modifier) {
 		this.key = key;
-		this.code = code;
-		this.mod = mod;
+		this.modifier = modifier;
 	}
 
 	public Key key() {
 		return key;
 	}
 
-	public int code() {
-		return code;
-	}
-
 	public Modifier modifier() {
-		return mod;
+		return modifier;
 	}
 
-	public KeyPress withModifier(Modifier mod) {
-		return new KeyPress(key, code, mod);
+	public KeyPress withModifier(Modifier modifier) {
+		return key.withModifier(modifier);
 	}
 
 	@Override
 	public String toString() {
-		return mod.prefix() + (key == Key.UNKNOWN ? code : key).toString();
+		return modifier.prefix() + key.toString();
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(key, code, mod);
+		return Objects.hash(key, modifier);
 	}
 
 	@Override
@@ -45,7 +39,7 @@ public class KeyPress {
 			return true;
 		} if (obj instanceof KeyPress) {
 			KeyPress ev = (KeyPress) obj;
-			return key == ev.key && code == ev.code && mod == ev.mod;
+			return key == ev.key && modifier == ev.modifier;
 		} else {
 			return false;
 		}

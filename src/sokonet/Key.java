@@ -15,4 +15,8 @@ public enum Key {
 			return values()[idx];
 		}
 	}
+
+	public KeyPress withModifier(Modifier modifier) {
+		return new KeyPress(this, modifier);
+	}
 }

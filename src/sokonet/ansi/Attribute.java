@@ -5,7 +5,7 @@ package sokonet.ansi;
  */
 public enum Attribute {
 	// Text style
-	Reset(0), Bright(1), Dim(2), Underscore(4), Blink(5), Reverse(7), Hidden(8),
+	Reset(0), Bold(1), Dim(2), Blink(5), Reverse(7), Normal(22), BlinkOff(25),
 
 	// Colors
 	BlackColor(30), RedColor(31), GreenColor(32), YellowColor(33), BlueColor(34),
