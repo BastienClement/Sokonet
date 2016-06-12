@@ -67,8 +67,8 @@ class Renderer {
 		}
 
 		Level.Cell cell = level.cell(x, y);
-		String chrs = cell.isTarget() ? "<>" : "  ";
-		Attribute color = cell.isTarget() ? Attribute.RedBackground : Attribute.WhiteBackground;
+		String chrs = "  ";
+		Attribute color = cell.isTarget() ? Attribute.YellowBackground : Attribute.WhiteBackground;
 
 		switch (cell.getContent()) {
 			case Void:
@@ -80,7 +80,7 @@ class Renderer {
 				break;
 
 			case Player:
-				color = Attribute.CyanBackground;
+				if (!cell.isTarget()) color = Attribute.CyanBackground;
 				chrs = "()";
 				break;
 
