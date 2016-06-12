@@ -7,7 +7,7 @@ import java.io.OutputStream;
 
 class TelnetDisplay extends AnsiDisplay implements Display {
 	private int width = 80;
-	private int height = 25;
+	private int height = 24;
 
 	TelnetDisplay(OutputStream out) {
 		super(out);

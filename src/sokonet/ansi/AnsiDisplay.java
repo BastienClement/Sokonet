@@ -74,11 +74,11 @@ public abstract class AnsiDisplay implements Display {
 	/**
 	 * Sets the cursor to the given position. Top-left position is 1:1.
 	 *
-	 * @param x the x coordinate
-	 * @param y the y coordinate
+	 * @param row the row coordinate
+	 * @param col the col coordinate
 	 */
-	public void setCursor(int x, int y) {
-		write(ESCAPE + "[" + x + ";" + y + "H");
+	public void setCursor(int row, int col) {
+		write(ESCAPE + "[" + row + ";" + col + "H");
 	}
 
 	/**

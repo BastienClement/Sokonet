@@ -1,9 +1,12 @@
 package sokonet.game;
 
-import sokonet.ansi.Attribute;
 import sokonet.ansi.AnsiDisplay;
+import sokonet.ansi.Attribute;
 import sokonet.ansi.ClearLineDirection;
 import sokonet.ansi.ClearScreenDirection;
+
+import java.util.Collections;
+import java.util.List;
 
 class Renderer {
 	private Sokoban game;
@@ -13,7 +16,11 @@ class Renderer {
 	private String statusRightText = "Sokonet 1.0";
 	private Attribute[] statusAttributes = new Attribute[] { Attribute.WhiteBackground, Attribute.BlackColor};
 
+	private int levelCursorX, levelCursorY;
+	private Attribute levelColor;
+
 	Renderer(Sokoban game, AnsiDisplay display) {
+		this.game = game;
 		this.display = display;
 		sync();
 	}
@@ -24,6 +31,74 @@ class Renderer {
 		} else {
 			return in;
 		}
+	}
+
+	private void drawLevel() {
+		drawLevel(Collections.emptyList());
+	}
+
+	private void drawLevel(List<Point> delta) {
+		game.level().ifPresent(level -> display.atomically(() -> {
+			int baseX = display.width() / 2 - level.width() + 1;
+			int baseY = (display.height() - 3) / 2 - level.height() / 2 + 1;
+
+			levelCursorX = levelCursorY = -1;
+			levelColor = Attribute.BlackBackground;
+			display.setAttribute(Attribute.BlackBackground, Attribute.BlackColor, Attribute.Bold);
+
+			if (delta.isEmpty()) {
+				for (int y = 0; y < level.height(); y++) {
+					for (int x = 0; x < level.width(); x++) {
+						drawLevelCell(level, x, y, baseX, baseY);
+					}
+				}
+			} else {
+				delta.forEach(pt -> drawLevelCell(level, pt.getX(), pt.getY(), baseX, baseY));
+			}
+		}));
+	}
+
+	private void drawLevelCell(Level level, int x, int y, int baseX, int baseY) {
+		int drawX = baseX + x * 2;
+		int drawY = baseY + y;
+
+		if (levelCursorX != drawX || levelCursorY != drawY) {
+			display.setCursor(drawY, drawX);
+		}
+
+		Level.Cell cell = level.cell(x, y);
+		String chrs = cell.isTarget() ? "<>" : "  ";
+		Attribute color = cell.isTarget() ? Attribute.RedBackground : Attribute.WhiteBackground;
+
+		switch (cell.getContent()) {
+			case Void:
+				if (cell.isOutside()) color = Attribute.BlackBackground;
+				break;
+
+			case Wall:
+				color = Attribute.BlueBackground;
+				break;
+
+			case Player:
+				color = Attribute.CyanBackground;
+				chrs = "()";
+				break;
+
+			case Crate:
+				if (cell.isTarget()) color = Attribute.GreenBackground;
+				chrs = "[]";
+				break;
+		}
+
+		if (color != levelColor) {
+			display.setAttribute(color);
+			levelColor = color;
+		}
+
+		display.write(chrs);
+
+		levelCursorX = drawX + 2;
+		levelCursorY = drawY;
 	}
 
 	private void drawStatus() {
@@ -56,26 +131,27 @@ class Renderer {
 		});
 	}
 
-	public void setStatusAttribtues(Attribute... attribtues) {
+	void setStatusAttribtues(Attribute... attribtues) {
 		statusAttributes = attribtues;
 		drawStatus();
 	}
 
-	public void setStatus(String text) {
+	void setStatus(String text) {
 		statusText = text;
 		drawStatus();
 	}
 
-	public void setStatusRight(String text) {
+	void setStatusRight(String text) {
 		statusRightText = text;
 		drawStatus();
 	}
 
-	public void sync() {
+	void sync() {
 		display.atomically(() -> {
 			display.setAttribute(Attribute.Reset);
 			display.hideCursor();
 			display.clear();
+			drawLevel();
 			drawStatus();
 			display.flush();
 		});
