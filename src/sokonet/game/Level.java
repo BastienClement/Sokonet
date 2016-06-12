@@ -1,6 +1,6 @@
 package sokonet.game;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 class Level {
@@ -185,6 +185,36 @@ class Level {
 	 * @return
 	 */
 	private List<Point> move(int dx, int dy) {
-		return Collections.emptyList();
+		List<Point> altered = new ArrayList<>(3);
+
+		int x = px + dx;
+		int y = py + dy;
+
+		switch (cells[x][y].content) {
+			case Wall:
+				throw new IllegalStateException("Invalid move!");
+
+			case Crate:
+				int xx = x + dx;
+				int yy = y + dy;
+				if (cells[xx][yy].content != Content.Void) {
+					throw new IllegalStateException("You cannot push this crate!");
+				} else {
+					cells[xx][yy].content = Content.Crate;
+					altered.add(new Point(xx, yy));
+				}
+				break;
+		}
+
+		cells[x][y].content = Content.Player;
+		cells[px][py].content = Content.Void;
+
+		altered.add(new Point(x, y));
+		altered.add(new Point(px, py));
+
+		px = x;
+		py = y;
+
+		return altered;
 	}
 }

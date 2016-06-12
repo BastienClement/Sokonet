@@ -1,5 +1,6 @@
 package sokonet.game;
 
+import sokonet.Key;
 import sokonet.KeyPress;
 import sokonet.Modifier;
 
@@ -21,6 +22,17 @@ public class KeyBindings {
 	 */
 	public void setDefaultCommand(Command command) {
 		defaultCommand = command;
+	}
+
+	/**
+	 * TODO
+	 *
+	 * @param key
+	 * @param command
+	 * @return
+	 */
+	public Optional<Command> set(Key key, Command command) {
+		return set(key.withModifier(Modifier.NONE), command);
 	}
 
 	/**

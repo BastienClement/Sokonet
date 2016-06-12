@@ -4,6 +4,7 @@ import sokonet.Game;
 import sokonet.Key;
 import sokonet.KeyPress;
 import sokonet.Modifier;
+import sokonet.ansi.Attribute;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,6 +56,9 @@ class TelnetHandler implements Runnable {
 						readCommand();
 						continue;
 					case 3: // CTRL-C
+						display.setAttribute(Attribute.Reset);
+						display.clear();
+						display.flush();
 						socket.close();
 						return;
 					case 13:

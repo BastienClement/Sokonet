@@ -37,10 +37,10 @@ class Renderer {
 		drawLevel(Collections.emptyList());
 	}
 
-	private void drawLevel(List<Point> delta) {
+	void drawLevel(List<Point> delta) {
 		game.level().ifPresent(level -> display.atomically(() -> {
 			int baseX = display.width() / 2 - level.width() + 1;
-			int baseY = (display.height() - 3) / 2 - level.height() / 2 + 1;
+			int baseY = (display.height() - 2) / 2 - level.height() / 2 + 1;
 
 			levelCursorX = levelCursorY = -1;
 			levelColor = Attribute.BlackBackground;
@@ -80,8 +80,8 @@ class Renderer {
 				break;
 
 			case Player:
-				if (!cell.isTarget()) color = Attribute.CyanBackground;
-				chrs = "()";
+				color = cell.isTarget() ? Attribute.CyanBackground : Attribute.MagentaBackground;
+				chrs = "<>";
 				break;
 
 			case Crate:
@@ -137,13 +137,17 @@ class Renderer {
 	}
 
 	void setStatus(String text) {
-		statusText = text;
-		drawStatus();
+		if (!text.equals(statusText)) {
+			statusText = text;
+			drawStatus();
+		}
 	}
 
 	void setStatusRight(String text) {
-		statusRightText = text;
-		drawStatus();
+		if (!text.equals(statusRightText)) {
+			statusRightText = text;
+			drawStatus();
+		}
 	}
 
 	void sync() {
