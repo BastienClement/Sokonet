@@ -3,8 +3,6 @@ package sokonet.game;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
 
 class Level {
 	/**
@@ -51,27 +49,6 @@ class Level {
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
 				cells[x][y] = new Cell();
-			}
-		}
-	}
-
-	/**
-	 * @param sa
-	 * @param sb
-	 * @param ea
-	 * @param eb
-	 * @param da
-	 * @param db
-	 */
-	private void doScanOutside(int sa, int sb,
-	                           Predicate<Integer> ea, Predicate<Integer> eb,
-	                           int da, int db,
-	                           BiFunction<Integer, Integer, Cell> resolver) {
-		for (int a = sa; ea.test(a); a += da) {
-			for (int b = sb; eb.test(b); b += db) {
-				Cell cell = resolver.apply(a, b);
-				if (cell.content == Content.Wall) break;
-				cell.outside = true;
 			}
 		}
 	}
