@@ -138,7 +138,7 @@ public abstract class LevelFactory {
 			walls.forEach(level::setWall);
 			targets.forEach(level::setTarget);
 			level.setPlayer(player);
-			level.scanOutsides();
+			level.scanInside();
 			return level;
 		}
 	}

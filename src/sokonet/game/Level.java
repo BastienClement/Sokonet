@@ -3,6 +3,8 @@ package sokonet.game;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
 
 class Level {
 	/**
@@ -18,7 +20,7 @@ class Level {
 	class Cell {
 		private Content content = Content.Void;
 		private boolean target = false;
-		private boolean outside = false;
+		private boolean outside = true;
 
 		Content getContent() {
 			return content;
@@ -39,7 +41,6 @@ class Level {
 	private Stack<Command> rewind = new Stack<>();
 
 	/**
-	 *
 	 * @param index
 	 * @param width
 	 * @param height
@@ -55,25 +56,46 @@ class Level {
 	}
 
 	/**
-	 * TODO
+	 * @param sa
+	 * @param sb
+	 * @param ea
+	 * @param eb
+	 * @param da
+	 * @param db
 	 */
-	void scanOutsides() {
-		for (Cell[] col : cells) {
-			for (int i = 0; i < col.length; i++) {
-				if (col[i].content == Content.Wall) break;
-				col[i].outside = true;
+	private void doScanOutside(int sa, int sb,
+	                           Predicate<Integer> ea, Predicate<Integer> eb,
+	                           int da, int db,
+	                           BiFunction<Integer, Integer, Cell> resolver) {
+		for (int a = sa; ea.test(a); a += da) {
+			for (int b = sb; eb.test(b); b += db) {
+				Cell cell = resolver.apply(a, b);
+				if (cell.content == Content.Wall) break;
+				cell.outside = true;
 			}
-
-			for (int i = col.length - 1; i > 0; i--) {
-				if (col[i].content == Content.Wall) break;
-				col[i].outside = true;
-			}
-
 		}
 	}
 
 	/**
-	 *
+	 * TODO
+	 */
+	void scanInside() {
+		scanInside(px, py);
+	}
+
+	private void scanInside(int x, int y) {
+		if (x >= cells.length || x < 0) return;
+		if (y >= cells[0].length || y < 0) return;
+		Cell cell = cells[x][y];
+		if (!cell.outside || cell.content == Content.Wall) return;
+		cell.outside = false;
+		scanInside(x + 1, y);
+		scanInside(x - 1, y);
+		scanInside(x, y + 1);
+		scanInside(x, y - 1);
+	}
+
+	/**
 	 * @return
 	 */
 	public int index() {
@@ -81,7 +103,6 @@ class Level {
 	}
 
 	/**
-	 *
 	 * @param x
 	 * @param y
 	 * @return
@@ -91,7 +112,6 @@ class Level {
 	}
 
 	/**
-	 *
 	 * @return
 	 */
 	int width() {
@@ -99,7 +119,6 @@ class Level {
 	}
 
 	/**
-	 *
 	 * @return
 	 */
 	int height() {
@@ -107,7 +126,6 @@ class Level {
 	}
 
 	/**
-	 *
 	 * @param pt
 	 */
 	void setWall(Point pt) {
@@ -115,7 +133,6 @@ class Level {
 	}
 
 	/**
-	 *
 	 * @param pt
 	 */
 	void setCrate(Point pt) {
@@ -123,7 +140,6 @@ class Level {
 	}
 
 	/**
-	 *
 	 * @param pt
 	 */
 	void setPlayer(Point pt) {
@@ -133,7 +149,6 @@ class Level {
 	}
 
 	/**
-	 *
 	 * @param pt
 	 */
 	void setTarget(Point pt) {
@@ -141,7 +156,6 @@ class Level {
 	}
 
 	/**
-	 *
 	 * @param pt
 	 * @param content
 	 */
@@ -159,7 +173,6 @@ class Level {
 	}
 
 	/**
-	 *
 	 * @return
 	 */
 	boolean done() {
@@ -172,7 +185,6 @@ class Level {
 	}
 
 	/**
-	 *
 	 * @return
 	 */
 	List<Point> up() {
@@ -180,7 +192,6 @@ class Level {
 	}
 
 	/**
-	 *
 	 * @return
 	 */
 	List<Point> right() {
@@ -188,7 +199,6 @@ class Level {
 	}
 
 	/**
-	 *
 	 * @return
 	 */
 	List<Point> down() {
@@ -196,7 +206,6 @@ class Level {
 	}
 
 	/**
-	 *
 	 * @return
 	 */
 	List<Point> left() {
@@ -204,7 +213,6 @@ class Level {
 	}
 
 	/**
-	 *
 	 * @param dx
 	 * @param dy
 	 * @return
