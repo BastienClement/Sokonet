@@ -57,7 +57,7 @@
 \begin{document}
 	
 	% Titre du document
-	\title{Sokoban} % ou autre nom 
+	\title{Sokonet}
 	\author{Rapport\\ 
 		Projet de MCR\\
 		Browne Champion Clément Hardy\\
@@ -81,5 +81,9 @@
 	\newpage
 	
 	\section{Introduction}
+		Dans le cadre du travail pratique de MCR sur un modèle conception, il nous a fallu réaliser une application sur la base d'un modèle. Celui nous ayant été attribué est le modèle de conception "commande". Dans l'idée d'utiliser au mieux les possibilités proposées par le modèle, c'est-à-dire, l'annulation de commande et l'utilisation de macros. Il nous est venu l'idée d'implémenter le "Sokoban" tournant sur un serveur et accessible depuis une terminal telnet, d'où l'ingénieux nom de "Sokonet".
+	\section{Contexte de mise en œuvre}
+		Le Sokoban est un jeu de puzzle dont le but est de pousser des caisses jusqu'à un lieu donnée. Il s'agit d'un jeu en deux dimensions dont les déplacements se font de case en case. De part la nature du jeu, il est possible de se bloquer dans la réalisation d'énigme. Par exemple, une caisse se situant dans un coin, ne peut plus être déplacé. À moins que ce coin ne soit une destination à atteindre, le joueur se retrouvera complètement bloqué par l'impossibilité de pouvoir déplacé la caisse jusqu'au bon endroit. Le modèle de conception "commande" permet alors de se sortir de telles situations. En effet, si tous les mouvements de l'utilisateur sont stockés dans un historique, il est possible d'annuler chaque mouvement et leur effet dans le jeu. Le modèle de conception autorise également l'utilisation de macro, soit une combinaison de plusieurs commandes.
+	\section{Diagramme de classe}
 
 \end{document}
