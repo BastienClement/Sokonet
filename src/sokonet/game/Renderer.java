@@ -80,8 +80,7 @@ class Renderer {
 				break;
 
 			case Player:
-				color = cell.isTarget() ? Attribute.CyanBackground : Attribute.MagentaBackground;
-				chrs = "<>";
+				color = Attribute.MagentaBackground;
 				break;
 
 			case Crate:
