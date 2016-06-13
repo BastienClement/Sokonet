@@ -72,7 +72,7 @@ class Renderer {
 
 		switch (cell.getContent()) {
 			case Void:
-				if (cell.isOutside()) color = Attribute.BlackBackground;
+				if (cell.isOutside()) color = Attribute.DefaultBackground;
 				break;
 
 			case Wall:
