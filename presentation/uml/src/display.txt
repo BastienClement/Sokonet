@@ -1,0 +1,80 @@
+@startuml
+
+title Diagramme de classes - Affichage
+
+interface Display{
+  {abstract}~int width()
+  {abstract}~int height()
+  {abstract}~void flush()
+  {abstract}~void clear()
+  {abstract}~void write(int c)
+  ~void write(int c, int length)
+  ~void write(byte[] bytes)
+  ~void write(byte[] bytes, int offset, int length)
+}
+
+class AnsiDisplay{
+  {static}-String ESCAPE
+  -StringBuilder buffer
+  -OutputStream out
+  +AnsiDisplay(OutputStream out)
+  +void write(int b)
+  +void write(byte[] bytes, int offset, int length)
+  +void flush()
+  +void setCursor(int row, int col)
+  +void hideCursor()
+  +void showCursor()
+  +void saveCursor()
+  +void restoreCursor()
+  +void clear()
+  +void clearLine()
+  +void clear(ClearLineDirection direction)
+  +void clear(ClearScreenDirection direction)
+  +void setAttribute(Attribute... attrs)
+  +void atomically(Runnable block)
+}
+
+class TelnetDisplay{
+  -int width
+  -int heigth
+  ~TelnetDisplay(OutputStream out)
+  ~void setSize(int width, int height)
+  +int width()
+  +int height()
+}
+
+class Renderer{
+  -String statusText
+  -String statusRightText
+  -Attribute[] statusAttributes
+  -String history
+  -int historyDx
+  -Attribute[] historyAttributes
+  -int levelCursorX
+  -int levelCursorY
+  -Attribute levelColor
+  
+  +Renderer(Sokoban game, AnsiDisplay display)
+  -String limit(String in, int length)
+  -void drawLevel()
+  ~drawLevel(List<Point> delta)
+  -drawLevelCell(Level level, int x, int y, int baseX, int baseY)
+  -void drawStatus()
+  -void drawHistory()
+  ~void setStatusAttribtues(Attribute... attribtues)
+  ~void setStatus(String text)
+  ~void setStatusRight(String text)
+  ~void setHistory(String text, int position)
+  ~void sync()
+}
+
+class Sokoban
+
+Display <|.down. AnsiDisplay
+AnsiDisplay <|-down- TelnetDisplay
+AnsiDisplay "1" <-right- "1" Renderer
+AnsiDisplay "1" <-- "1" Sokoban
+
+Renderer "1" -- "1" Sokoban
+
+@enduml

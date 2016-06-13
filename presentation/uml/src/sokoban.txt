@@ -1,0 +1,106 @@
+@startuml
+
+title Diagramme de classes - Sokoban
+
+interface Game{
+  {abstract}~void keyPressed(KeyPress event)
+  {abstract}~void displaySizeChanged()
+}
+
+class Sokoban{
+  {static}-int DISPLAY_MIN_WIDTH
+  {static}-int DISPLAY_MIN_HEIGHT
+  -int levelIndex
+  +Sokoban(AnsiDisplay display)
+  -void selectLevel(int index)
+  -Command performMovement(String name, Function<Level, List<Point>> move)
+  -Command offsetLevel(String name, int offset)
+  -void startRecording()
+  +Optional<Level> level()
+  +KeyBindings bindings()
+  +void setBindings(KeyBindings bindings)
+  +void pushBindings(KeyBindings binds)
+  +void popBindings()
+  +void keyPressed(KeyPress key)
+  +void displaySizeChanged()
+}
+
+class Level{
+  -int index
+  -int px
+  -int py
+  
+  +Level(int index, int width, int height)
+  +void scanInside()
+  -void scanInside(int x, int y)
+  +int index()
+  ~Cell cell(int x, int y)
+  ~int width()
+  ~int height()
+  ~void setWall(Point pt)
+  ~void setCrate(Point pt)
+  ~void setPlayer(Point pt)
+  ~void setTarget(Point pt)
+  -void setContent(Point pt, Content content)
+  ~boolean done()
+  ~List<Point> up()
+  ~List<Point> right()
+  ~List<Point> down()
+  ~List<Point> left()
+  -List<Point> move(int dx, int dy)
+  
+}
+
+class Renderer
+
+class Cell{
+  -boolean target
+  -boolean outside
+  ~Content getContent()
+  ~boolean isTarget()
+  ~boolean isOutside()
+}
+
+enum Content{
+  Void
+  Wall
+  Player
+  Crate
+}
+
+abstract class LevelFactory{
+  {static}+void load(String file)
+  {static}+int getNumLevels()
+  {static}+Level getLevel(int index)
+}
+
+class LevelBlueprint{
+  -int width
+  -int height
+  -Point player
+  -List<Point> walls
+  -List<Point> crates
+  -List<Point> targets
+  
+  ~LevelBlueprint(String[] lines)
+  ~Level build(int index)
+}
+
+class AnsiDisplay
+
+class KeyBindings
+class KeyPress
+
+Game <|.down. Sokoban
+AnsiDisplay "1" <-up- "1" Sokoban
+KeyBindings "*" <-down- "1" Sokoban
+KeyPress "*" <-down- "1" Sokoban
+Level "1" <-left- "1" Sokoban
+Cell "*" <-left- "1" Level
+Content "1" <-left- "1" Cell
+Renderer "1" -left- "1" Sokoban
+LevelFactory <.down. Sokoban : getLevel
+LevelBlueprint "*" <-left- "1" LevelFactory
+AnsiDisplay "1" <-- "1" Renderer
+
+@enduml

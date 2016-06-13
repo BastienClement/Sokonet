@@ -120,7 +120,6 @@ gmon.out
 
 # other
 *.mp4
-*.png
 
 ######
 # Qt #
@@ -150,3 +149,4 @@ Makefile*
 #QtCtreator CMake
 CMakeLists.txt.user
 
+/bin/

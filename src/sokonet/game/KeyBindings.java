@@ -7,13 +7,24 @@ import sokonet.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 
 /**
  * TODO
  */
 public class KeyBindings {
 	private Map<KeyPress, Command> bindings = new HashMap<>();
-	private Command defaultCommand;
+	private Function<KeyPress, Command> defaultCommandFactory;
+
+	/**
+	 * TODO
+	 *
+	 * @param factory
+	 */
+	public void setDefaultCommandFactory(Function<KeyPress, Command> factory) {
+		defaultCommandFactory = factory;
+	}
 
 	/**
 	 * TODO
@@ -21,7 +32,7 @@ public class KeyBindings {
 	 * @param command
 	 */
 	public void setDefaultCommand(Command command) {
-		defaultCommand = command;
+		defaultCommandFactory = k -> command;
 	}
 
 	/**
@@ -62,10 +73,18 @@ public class KeyBindings {
 		}
 
 		// Default
-		if (command == null) {
-			command = defaultCommand;
+		if (command == null && defaultCommandFactory != null) {
+			command = defaultCommandFactory.apply(key);
 		}
 
 		return Optional.ofNullable(command);
+	}
+
+	/**
+	 *
+	 * @return
+	 */
+	public Set<KeyPress> boundKeys() {
+		return bindings.keySet();
 	}
 }

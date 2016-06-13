@@ -7,10 +7,7 @@ import sokonet.KeyPress;
 import sokonet.ansi.AnsiDisplay;
 import sokonet.ansi.Attribute;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Stack;
+import java.util.*;
 import java.util.function.Function;
 
 public class Sokoban implements Game {
@@ -21,7 +18,10 @@ public class Sokoban implements Game {
 
 	private AnsiDisplay display;
 	private Renderer renderer;
+
+	private KeyBindings defaultBindings;
 	private Stack<KeyBindings> bindings;
+	private Set<KeyPress> protectedKeys;
 
 	private String history = "";
 	private int historyDx = 0;
@@ -38,8 +38,29 @@ public class Sokoban implements Game {
 		this.display = display;
 		this.renderer = new Renderer(this, display);
 
+		defaultBindings = new KeyBindings();
+		defaultBindings.set(Key.W, performMovement("W", Level::up));
+		defaultBindings.set(Key.A, performMovement("A", Level::left));
+		defaultBindings.set(Key.S, performMovement("S", Level::down));
+		defaultBindings.set(Key.D, performMovement("D", Level::right));
+		defaultBindings.set(Key.R, offsetLevel("RESET", 0));
+		defaultBindings.set(Key.P, offsetLevel("NEXT", 1));
+		defaultBindings.set(Key.O, offsetLevel("PREV", -1));
+		defaultBindings.set(Key.Z, Command.named("REWIND", () -> {
+			if (-historyDx < history.length()) {
+				level.rewind();
+				historyDx--;
+				renderer.setHistory(history, historyDx);
+				renderer.sync();
+			}
+		}));
+		defaultBindings.set(Key.M, this::startRecording);
+
+		protectedKeys = new HashSet<>();
+		protectedKeys.addAll(defaultBindings.boundKeys());
+
 		bindings = new Stack<>();
-		bindings.push(buildDefaultBindings());
+		bindings.push(defaultBindings);
 		selectLevel(0);
 
 		if (display.width() < DISPLAY_MIN_WIDTH || display.height() < DISPLAY_MIN_HEIGHT) {
@@ -101,27 +122,43 @@ public class Sokoban implements Game {
 		});
 	}
 
-	/**
-	 * @return
-	 */
-	private KeyBindings buildDefaultBindings() {
-		KeyBindings binds = new KeyBindings();
-		binds.set(Key.W, performMovement("W", Level::up));
-		binds.set(Key.A, performMovement("A", Level::left));
-		binds.set(Key.S, performMovement("S", Level::down));
-		binds.set(Key.D, performMovement("D", Level::right));
-		binds.set(Key.R, offsetLevel("RESET", 0));
-		binds.set(Key.P, offsetLevel("NEXT", 1));
-		binds.set(Key.O, offsetLevel("PREV", -1));
-		binds.set(Key.Z, Command.named("REWIND", () -> {
-			if (-historyDx < history.length()) {
-				level.rewind();
-				historyDx--;
-				renderer.setHistory(history, historyDx);
-				renderer.sync();
+	private void startRecording() {
+		renderer.setStatusAttribtues(Attribute.RedBackground, Attribute.WhiteColor);
+		renderer.setStatus("-- RECORDING --");
+
+		Command stopRecording = () -> {
+			renderer.setStatusAttribtues(Attribute.WhiteBackground, Attribute.BlackColor);
+			renderer.setStatus("");
+			popBindings();
+		};
+
+		List<Command> macro = new ArrayList<>();
+
+		KeyBindings recorder = new KeyBindings();
+		KeyBindings binder = new KeyBindings();
+
+		recorder.setDefaultCommandFactory(k -> () -> defaultBindings.get(k).ifPresent(macro::add));
+		recorder.set(Key.ESC, stopRecording);
+		recorder.set(Key.M, () -> {
+			if (macro.isEmpty()) {
+				stopRecording.execute();
+			} else {
+				renderer.setStatus("-- SELECT MACRO KEY --");
+				setBindings(binder);
 			}
-		}));
-		return binds;
+		});
+
+		binder.set(Key.ESC, stopRecording);
+		binder.setDefaultCommandFactory(k -> {
+			if (protectedKeys.contains(k)) {
+				return () -> renderer.setStatus("This key is protected and cannot be bound to a macro");
+			} else {
+				Command bind = () -> defaultBindings.set(k, Macro.of(macro.toArray(new Command[0])));
+				return bind.andThen(stopRecording);
+			}
+		});
+
+		bindings.push(recorder);
 	}
 
 	/**
