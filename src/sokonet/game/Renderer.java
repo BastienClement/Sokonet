@@ -15,6 +15,9 @@ class Renderer {
 	private String statusText = "Hello, world!";
 	private String statusRightText = "Sokonet 1.0";
 	private Attribute[] statusAttributes = new Attribute[] { Attribute.WhiteBackground, Attribute.BlackColor};
+	private String history = "historique de merde";
+	private int historyDx = 0;
+	private Attribute[] historyAttributes = new Attribute[] { Attribute.WhiteBackground, Attribute.BlackColor};
 
 	private int levelCursorX, levelCursorY;
 	private Attribute levelColor;
@@ -105,8 +108,8 @@ class Renderer {
 			int status_row = display.height() - 1;
 			int status_width = display.width() - 4;
 
-			// Clear the last 3 lines of the screen
-			display.setCursor(status_row - 1, 1);
+			// Clear the last lines of the screen
+			display.setCursor(status_row, 1);
 			display.setAttribute(Attribute.Reset);
 			display.clear(ClearScreenDirection.DOWN);
 
@@ -130,6 +133,31 @@ class Renderer {
 		});
 	}
 
+	private void drawHistory() {
+		display.atomically(() -> {
+			int history_row = display.height() - 3;
+			int history_width = display.width() - 4;
+
+			// Clear the last lines of the screen
+			display.setCursor(history_row, 1);
+			display.setAttribute(Attribute.Reset);
+			display.clear(ClearScreenDirection.DOWN);
+
+			// Draw history
+			display.setAttribute(historyAttributes);
+			display.setCursor(history_row, 2);
+			display.write(' ');
+			display.write(limit(history, history_width));
+			display.write(' ', history_width + 3 - (history.length() + 2));
+
+			// history bar end
+			display.setAttribute(Attribute.Reset);
+			display.setCursor(history_row + 1, history.length() + historyDx + 2);
+			display.write('^');
+			display.clear(ClearLineDirection.RIGHT);
+		});
+	}
+
 	void setStatusAttribtues(Attribute... attribtues) {
 		statusAttributes = attribtues;
 		drawStatus();
@@ -149,12 +177,21 @@ class Renderer {
 		}
 	}
 
+	void setHistory(String text, int position) {
+		if (!text.equals(history)) {
+			history = text;
+			historyDx = position;
+			drawHistory();
+		}
+	}
+
 	void sync() {
 		display.atomically(() -> {
 			display.setAttribute(Attribute.Reset);
 			display.hideCursor();
 			display.clear();
 			drawLevel();
+			drawHistory();
 			drawStatus();
 			display.flush();
 		});

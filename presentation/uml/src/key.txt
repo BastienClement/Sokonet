@@ -1,0 +1,51 @@
+@startuml
+
+title Diagramme de classes - Keys
+
+
+class Sokoban
+
+class KeyBindings{
+  -Map<KeyPress, Command> bindings
+  -Function<KeyPress, Command> defaultCommandFactory
+  
+  +void setDefaultCommandFactory(Function<KeyPress, Command> factory)
+  +void setDefaultCommand(Command command)
+  +Optional<Command> set(Key key, Command command)
+  +Optional<Command> set(KeyPress key, Command command)
+  +Optional<Command> get(KeyPress key)
+  +Set<KeyPress> boundKeys()
+}
+
+class KeyPress{
+  +KeyPress(Key key, Modifier modifier)
+}
+
+enum Key{
+  A
+  B
+  C
+  [...]
+  TAB
+  SPACE
+  [...]
+  
+  +{static}Key forCode(int code)
+  +KeyPress withModifier(Modifier modifier)
+}
+
+enum Modifier{
+  NONE
+  SHIFT
+  CTRL
+  
+  +Modifier(String prefix)
+  +String prefix()
+}
+
+KeyBindings "*" <-right- "1" Sokoban
+KeyPress "*" <-up- "1" Sokoban
+KeyPress *-right- Key
+KeyPress *-right- Modifier
+
+@enduml
