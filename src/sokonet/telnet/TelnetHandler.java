@@ -33,13 +33,21 @@ class TelnetHandler implements Runnable {
 		display = new TelnetDisplay(out);
 	}
 
-	private void startGame() {
-		if (game != null) throw new IllegalStateException();
+	private synchronized void startGame() {
+		if (game != null) return;
 		game = factory.apply(display);
 	}
 
 	@Override
 	public void run() {
+		// Timeout if remove does not perform window size negotiation
+		new Thread(() -> {
+			try {
+				Thread.sleep(500);
+				startGame();
+			} catch (InterruptedException ignored) {}
+		}).start();
+
 		try {
 			command(WILL, ECHO);
 			command(WILL, SUPPRESS_GO_AHEAD);
