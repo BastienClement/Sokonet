@@ -56,6 +56,8 @@ class TelnetHandler implements Runnable {
 						readCommand();
 						continue;
 					case 3: // CTRL-C
+						display.setCursor(1, 1);
+						display.showCursor();
 						display.setAttribute(Attribute.Reset);
 						display.clear();
 						display.flush();
