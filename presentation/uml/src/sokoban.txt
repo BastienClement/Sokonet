@@ -42,6 +42,7 @@ class Level{
   ~void setPlayer(Point pt)
   ~void setTarget(Point pt)
   -void setContent(Point pt, Content content)
+  ~void rewind()
   ~boolean done()
   ~List<Point> up()
   ~List<Point> right()
@@ -86,6 +87,19 @@ class LevelBlueprint{
   ~Level build(int index)
 }
 
+class TelnetGameServer{
+  -int port
+  -Thread thread
+  {static}+TelnetGameServer bind(Function<> factory, int port)
+  -TelnetGameServer(Function<> factory, int port)
+  +void start()
+  -void run()
+}
+
+class Sokonet{
+  {static}void main(String... args)
+}
+
 class AnsiDisplay
 
 class KeyBindings
@@ -96,11 +110,13 @@ AnsiDisplay "1" <-up- "1" Sokoban
 KeyBindings "*" <-down- "1" Sokoban
 KeyPress "*" <-down- "1" Sokoban
 Level "1" <-left- "1" Sokoban
-Cell "*" <-left- "1" Level
-Content "1" <-left- "1" Cell
+Cell "*" <-up- "1" Level
+Content "1" <-right- "1" Cell
 Renderer "1" -left- "1" Sokoban
 LevelFactory <.down. Sokoban : getLevel
 LevelBlueprint "*" <-left- "1" LevelFactory
 AnsiDisplay "1" <-- "1" Renderer
+LevelFactory <-up- TelnetGameServer
+TelnetGameServer <.left. Sokonet : bind && start
 
 @enduml

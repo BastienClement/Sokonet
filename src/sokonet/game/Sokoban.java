@@ -55,6 +55,9 @@ public class Sokoban implements Game {
 			}
 		}));
 		defaultBindings.set(Key.M, this::startRecording);
+		defaultBindings.set(Key.H, () -> {
+			renderer.setStatus("Move: W A S D, Undo: Z, Reset: R, Nav: O P, Quit: ^C");
+		});
 
 		protectedKeys = new HashSet<>();
 		protectedKeys.addAll(defaultBindings.boundKeys());
@@ -62,6 +65,7 @@ public class Sokoban implements Game {
 		bindings = new Stack<>();
 		bindings.push(defaultBindings);
 		selectLevel(0);
+		renderer.setStatus("Press H for help");
 
 		if (display.width() < DISPLAY_MIN_WIDTH || display.height() < DISPLAY_MIN_HEIGHT) {
 			displaySizeChanged();
@@ -87,7 +91,7 @@ public class Sokoban implements Game {
 	 * @return
 	 */
 	private Command performMovement(String name, Function<Level, List<Point>> move) {
-		Command cmd = Command.named(name, () -> {
+		return Command.named(name, () -> {
 			try {
 				List<Point> delta = move.apply(level);
 				renderer.setStatus("");
@@ -96,16 +100,14 @@ public class Sokoban implements Game {
 					selectLevel(levelIndex + 1);
 					renderer.setStatus("Congratulation, you solved level #" + levelIndex);
 				}
+				if (historyDx < 0)
+					history = history.substring(0, history.length() + historyDx);
+				history = history + name;
+				historyDx = 0;
+				renderer.setHistory(history, historyDx);
 			} catch (IllegalStateException ex) {
 				renderer.setStatus(ex.getMessage());
 			}
-		});
-		return cmd.andThen(() -> {
-			if (historyDx < 0)
-				history = history.substring(0, history.length() + historyDx);
-			history = history + cmd.toString();
-			historyDx = 0;
-			renderer.setHistory(history, historyDx);
 		});
 	}
 
