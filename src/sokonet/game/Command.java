@@ -6,15 +6,16 @@ package sokonet.game;
 @FunctionalInterface
 interface Command {
 	/**
-	 * TODO
+	 * Executes the command.
 	 */
 	void execute();
 
 	/**
-	 * TODO
+	 * Constructs a new Command that first executes the action of this command
+	 * followed by the action of the given command.
 	 *
-	 * @param cmd
-	 * @return
+	 * @param cmd the second command to execute
+	 * @return a Macro command executing both command as one
 	 */
 	default Command andThen(Command cmd) {
 		return new Macro(this, cmd);
@@ -23,11 +24,11 @@ interface Command {
 	/**
 	 * Constructs a new named command.
 	 *
-	 * @param name
-	 * @param command
-	 * @return
+	 * @param name    the command name
+	 * @param command the command being named
+	 * @return a named command performing the same action
 	 */
-	static Command named(String name, Runnable command) {
+	static Command named(String name, Command command) {
 		return new Named(name, command);
 	}
 
@@ -36,16 +37,16 @@ interface Command {
 	 */
 	class Named implements Command {
 		private String name;
-		private Runnable command;
+		private Command command;
 
-		Named(String name, Runnable command) {
+		Named(String name, Command command) {
 			this.name = name;
 			this.command = command;
 		}
 
 		@Override
 		public void execute() {
-			command.run();
+			command.execute();
 		}
 
 		@Override

@@ -1,6 +1,5 @@
 package sokonet.game;
 
-import javafx.util.Pair;
 import sokonet.Game;
 import sokonet.Key;
 import sokonet.KeyPress;
@@ -9,10 +8,17 @@ import sokonet.ansi.Attribute;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
+/**
+ * The main game class.
+ */
 public class Sokoban implements Game {
+	// A dummy bindings collection with no commands, used to lock the game
+	// if the display size is too small
 	private static final KeyBindings BINDINGS_LOCKED = new KeyBindings();
 
+	// Display size limits
 	private static final int DISPLAY_MIN_WIDTH = 80;
 	private static final int DISPLAY_MIN_HEIGHT = 24;
 
@@ -73,7 +79,9 @@ public class Sokoban implements Game {
 	}
 
 	/**
-	 * @param index
+	 * Loads a new level.
+	 *
+	 * @param index the index of the level to load
 	 */
 	private void selectLevel(int index) {
 		level = LevelFactory.getLevel(index);
@@ -86,9 +94,11 @@ public class Sokoban implements Game {
 	}
 
 	/**
-	 * @param name
-	 * @param move
-	 * @return
+	 * Constructs a command performing a player movement in the current level.
+	 *
+	 * @param name the name of the command
+	 * @param move a function invoking the correct movement method on the level
+	 * @return a command that perform the movement
 	 */
 	private Command performMovement(String name, Function<Level, List<Point>> move) {
 		return Command.named(name, () -> {
@@ -112,18 +122,31 @@ public class Sokoban implements Game {
 	}
 
 	/**
-	 * @param name
-	 * @param offset
-	 * @return
+	 * Constructs a command selecting a level based on an offset from the
+	 * current one. If called with an offset of 0, produces a command that
+	 * resets the current level (by selecting the same one).
+	 *
+	 * @param name   the name of the command
+	 * @param offset the offset of the level to select
+	 * @return a command selecting a new level
 	 */
 	private Command offsetLevel(String name, int offset) {
 		return Command.named(name, () -> {
 			try {
 				selectLevel(levelIndex + offset);
-			} catch (IndexOutOfBoundsException ignored) {}
+			} catch (IndexOutOfBoundsException ignored) {
+			}
 		});
 	}
 
+	/**
+	 * Starts macro recording.
+	 * <p>
+	 * This methods replace the default key bindings object with a new mapping
+	 * that intercept key presses and builds a list of command to execute.
+	 * <p>
+	 * It is impossible to override basic action keys.
+	 */
 	private void startRecording() {
 		renderer.setStatusAttribtues(Attribute.RedBackground, Attribute.WhiteColor);
 		renderer.setStatus("-- RECORDING --");
@@ -139,7 +162,11 @@ public class Sokoban implements Game {
 		KeyBindings recorder = new KeyBindings();
 		KeyBindings binder = new KeyBindings();
 
-		recorder.setDefaultCommandFactory(k -> () -> defaultBindings.get(k).ifPresent(macro::add));
+		recorder.setDefaultCommandFactory(k -> () -> defaultBindings.get(k).ifPresent(cmd -> {
+			macro.add(cmd);
+			renderer.setStatus(macro.stream().map(Command::toString).collect(Collectors.joining(" ")));
+		}));
+
 		recorder.set(Key.ESC, stopRecording);
 		recorder.set(Key.M, () -> {
 			if (macro.isEmpty()) {
@@ -164,25 +191,27 @@ public class Sokoban implements Game {
 	}
 
 	/**
-	 * @return
+	 * Returns the current level, if defined.
+	 *
+	 * @return the current level
 	 */
 	public Optional<Level> level() {
 		return Optional.ofNullable(level);
 	}
 
 	/**
-	 * TODO
+	 * Returns the current key bindings collection.
 	 *
-	 * @return
+	 * @return the current key bindings collection
 	 */
 	public KeyBindings bindings() {
 		return bindings.peek();
 	}
 
 	/**
-	 * TODO
+	 * Replaces the top-most key bindings on the stack.
 	 *
-	 * @param bindings
+	 * @param bindings the new key bindings to use
 	 */
 	public void setBindings(KeyBindings bindings) {
 		popBindings();
@@ -190,16 +219,16 @@ public class Sokoban implements Game {
 	}
 
 	/**
-	 * TODO
+	 * Pushes a new key bindings collection on the stack.
 	 *
-	 * @param binds
+	 * @param binds the new key bindings to use
 	 */
 	public void pushBindings(KeyBindings binds) {
 		bindings.push(binds);
 	}
 
 	/**
-	 * TODO
+	 * Removes the top-most key bindings collection from the stack.
 	 */
 	public void popBindings() {
 		bindings.pop();
