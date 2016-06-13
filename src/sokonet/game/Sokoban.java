@@ -1,11 +1,13 @@
 package sokonet.game;
 
+import javafx.util.Pair;
 import sokonet.Game;
 import sokonet.Key;
 import sokonet.KeyPress;
 import sokonet.ansi.AnsiDisplay;
 import sokonet.ansi.Attribute;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
@@ -20,6 +22,9 @@ public class Sokoban implements Game {
 	private AnsiDisplay display;
 	private Renderer renderer;
 	private Stack<KeyBindings> bindings;
+
+	private String history = "";
+	private int historyDx = 0;
 
 	private int levelIndex;
 	private Level level;
@@ -48,6 +53,9 @@ public class Sokoban implements Game {
 	private void selectLevel(int index) {
 		level = LevelFactory.getLevel(index);
 		levelIndex = index;
+		history = "";
+		historyDx = 0;
+		renderer.setHistory(history, historyDx);
 		renderer.setStatusRight("#" + (index + 1));
 		renderer.sync();
 	}
@@ -58,7 +66,7 @@ public class Sokoban implements Game {
 	 * @return
 	 */
 	private Command performMovement(String name, Function<Level, List<Point>> move) {
-		return Command.named(name, () -> {
+		Command cmd = Command.named(name, () -> {
 			try {
 				List<Point> delta = move.apply(level);
 				renderer.setStatus("");
@@ -70,6 +78,13 @@ public class Sokoban implements Game {
 			} catch (IllegalStateException ex) {
 				renderer.setStatus(ex.getMessage());
 			}
+		});
+		return cmd.andThen(() -> {
+			if (historyDx < 0)
+				history = history.substring(0, history.length() + historyDx);
+			history = history + cmd.toString();
+			historyDx = 0;
+			renderer.setHistory(history, historyDx);
 		});
 	}
 
@@ -91,16 +106,20 @@ public class Sokoban implements Game {
 	 */
 	private KeyBindings buildDefaultBindings() {
 		KeyBindings binds = new KeyBindings();
-		binds.set(Key.W, performMovement("UP", Level::up));
-		binds.set(Key.A, performMovement("LEFT", Level::left));
-		binds.set(Key.S, performMovement("DOWN", Level::down));
-		binds.set(Key.D, performMovement("RIGHT", Level::right));
+		binds.set(Key.W, performMovement("W", Level::up));
+		binds.set(Key.A, performMovement("A", Level::left));
+		binds.set(Key.S, performMovement("S", Level::down));
+		binds.set(Key.D, performMovement("D", Level::right));
 		binds.set(Key.R, offsetLevel("RESET", 0));
 		binds.set(Key.P, offsetLevel("NEXT", 1));
 		binds.set(Key.O, offsetLevel("PREV", -1));
 		binds.set(Key.Z, Command.named("REWIND", () -> {
-			level.rewind();
-			renderer.sync();
+			if (-historyDx < history.length()) {
+				level.rewind();
+				historyDx--;
+				renderer.setHistory(history, historyDx);
+				renderer.sync();
+			}
 		}));
 		return binds;
 	}

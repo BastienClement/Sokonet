@@ -15,7 +15,7 @@ class Renderer {
 	private String statusText = "Hello, world!";
 	private String statusRightText = "Sokonet 1.0";
 	private Attribute[] statusAttributes = new Attribute[] { Attribute.WhiteBackground, Attribute.BlackColor};
-	private String history = "historique de merde";
+	private String history = ".";
 	private int historyDx = 0;
 	private Attribute[] historyAttributes = new Attribute[] { Attribute.WhiteBackground, Attribute.BlackColor};
 
@@ -138,21 +138,40 @@ class Renderer {
 			int history_row = display.height() - 3;
 			int history_width = display.width() - 4;
 
-			// Clear the last lines of the screen
+			String buffer = history;
+			int dx = historyDx;
+			if (buffer.length() > history_width) {
+				if (-dx < history_width / 2) {
+					buffer = "..." + buffer.substring(buffer.length() - history_width + 3);
+				}
+				else if (buffer.length() + dx < history_width / 2) {
+					dx = -(history_width - (buffer.length() + dx));
+					buffer = buffer.substring(0, history_width - 3) + "...";
+				}
+				else {
+					int tmp = buffer.length() + dx - (history_width / 2 - 3);
+					buffer = "..." + buffer.substring(tmp, tmp + history_width - 6) + "...";
+					dx = -(history_width / 2);
+				}
+			}
+
+			// Clear the lines of the screen
 			display.setCursor(history_row, 1);
 			display.setAttribute(Attribute.Reset);
-			display.clear(ClearScreenDirection.DOWN);
+			display.clearLine();
+			display.setCursor(history_row + 1, 1);
+			display.clearLine();
 
 			// Draw history
 			display.setAttribute(historyAttributes);
 			display.setCursor(history_row, 2);
 			display.write(' ');
-			display.write(limit(history, history_width));
-			display.write(' ', history_width + 3 - (history.length() + 2));
+			display.write(buffer);
+			display.write(' ', history_width + 3 - (buffer.length() + 2));
 
 			// history bar end
 			display.setAttribute(Attribute.Reset);
-			display.setCursor(history_row + 1, history.length() + historyDx + 2);
+			display.setCursor(history_row + 1, buffer.length() + dx + 3);
 			display.write('^');
 			display.clear(ClearLineDirection.RIGHT);
 		});
@@ -177,10 +196,10 @@ class Renderer {
 		}
 	}
 
-	void setHistory(String text, int position) {
-		if (!text.equals(history)) {
+	void setHistory(String text, int dx) {
+		if (!text.equals(history) || historyDx != dx) {
 			history = text;
-			historyDx = position;
+			historyDx = dx;
 			drawHistory();
 		}
 	}
