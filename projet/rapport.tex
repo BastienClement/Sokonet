@@ -1,0 +1,85 @@
+\documentclass[french]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lipsum}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{babel}
+\usepackage{graphicx}
+\usepackage{lastpage}
+\usepackage{ragged2e}
+\usepackage{enumitem}
+\usepackage[normalem]{ulem}
+\usepackage{hyperref} % pour \url{URL}
+\usepackage{color} % pour \textcolor{color}{text}
+\usepackage{listings} % pour afficher du code
+\usepackage{longtable} % pour l'environnement longtable
+\usepackage{float} % pour des figures non flottantes
+\usepackage{amsmath}
+\usepackage{caption} % figure et subfigure pour mettre les images côtes à côtes
+\usepackage{subcaption}
+\usepackage{dirtree}
+
+% Style Java
+\lstset{
+	language=Java,
+	tabsize=2,
+	basicstyle=\small\ttfamily,
+	keywordstyle=\color{blue},
+	stringstyle=\color{red},
+	commentstyle=\color{black!40},
+	morecomment=[l][\color{black!50}]{\#},
+	gobble=10,
+	frame=single,
+	otherkeywords={}
+}
+
+\geometry{
+	a4paper,
+	total={210mm,297mm},
+	left=20mm,
+	right=20mm,
+	top=20mm,
+	bottom=20mm,
+}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\setlist[enumerate,1]{leftmargin=2cm}
+
+% Entêtes
+\lhead{Browne, Champion, Clément, Hardy}
+\chead{}
+\rhead{MCR: Rapport}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\begin{document}
+	
+	% Titre du document
+	\title{Sokoban} % ou autre nom 
+	\author{Rapport\\ 
+		Projet de MCR\\
+		Browne Champion Clément Hardy\\
+		Resp. Pier Donini\\
+		HEIG-VD}
+	\date{\today} % date du jour
+	\maketitle
+	\thispagestyle{empty}
+	
+	\newpage
+	\thispagestyle{empty}
+	$ $
+	\newpage
+	
+	% Pour tout le document
+	\justify
+	\normalsize
+	
+	% Tables des matières
+	\tableofcontents
+	\newpage
+	
+	\section{Introduction}
+
+\end{document}
