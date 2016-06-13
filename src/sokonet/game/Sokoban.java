@@ -55,6 +55,9 @@ public class Sokoban implements Game {
 			}
 		}));
 		defaultBindings.set(Key.M, this::startRecording);
+		defaultBindings.set(Key.H, () -> {
+			renderer.setStatus("Move: W A S D, Undo: Z, Reset: R, Nav: O P, Quit: ^C");
+		});
 
 		protectedKeys = new HashSet<>();
 		protectedKeys.addAll(defaultBindings.boundKeys());
@@ -62,6 +65,7 @@ public class Sokoban implements Game {
 		bindings = new Stack<>();
 		bindings.push(defaultBindings);
 		selectLevel(0);
+		renderer.setStatus("Press H for help");
 
 		if (display.width() < DISPLAY_MIN_WIDTH || display.height() < DISPLAY_MIN_HEIGHT) {
 			displaySizeChanged();
