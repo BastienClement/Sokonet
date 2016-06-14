@@ -4,30 +4,49 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+/**
+ * A Sokoban level.
+ * Handles the state of the game and movements.
+ */
 class Level {
 	/**
-	 *
+	 * The content of a level cell.
 	 */
 	enum Content {
 		Void, Wall, Player, Crate
 	}
 
 	/**
-	 *
+	 * A level cell.
 	 */
 	class Cell {
 		private Content content = Content.Void;
 		private boolean target = false;
 		private boolean outside = true;
 
+		/**
+		 * Returns the content of the cell.
+		 *
+		 * @return the content of the cell
+		 */
 		Content getContent() {
 			return content;
 		}
 
+		/**
+		 * Checks if the cell is a target.
+		 *
+		 * @return true if the cell is a target, false otherwise
+		 */
 		boolean isTarget() {
 			return target;
 		}
 
+		/**
+		 * Checks if the cell is outside the level walls.
+		 *
+		 * @return true if the cell is outside the level wall
+		 */
 		boolean isOutside() {
 			return outside;
 		}
@@ -39,9 +58,11 @@ class Level {
 	private Stack<Command> rewind = new Stack<>();
 
 	/**
-	 * @param index
-	 * @param width
-	 * @param height
+	 * Constructs a new level of the given size.
+	 *
+	 * @param index  the index of the level
+	 * @param width  the width of the level
+	 * @param height the height of the level
 	 */
 	Level(int index, int width, int height) {
 		this.index = index;
@@ -54,7 +75,7 @@ class Level {
 	}
 
 	/**
-	 * TODO
+	 * Performs a flood fill of the inside of the level.
 	 */
 	void scanInside() {
 		scanInside(px, py);
@@ -73,51 +94,65 @@ class Level {
 	}
 
 	/**
-	 * @return
+	 * Returns the index of this level.
+	 *
+	 * @return the index of the level
 	 */
 	public int index() {
 		return index;
 	}
 
 	/**
-	 * @param x
-	 * @param y
-	 * @return
+	 * Retrieves the cell at the given coordinates.
+	 *
+	 * @param x the x coordinate of the cell
+	 * @param y the y coordinate of the cell
+	 * @return the requested cell
 	 */
 	Cell cell(int x, int y) {
 		return cells[x][y];
 	}
 
 	/**
-	 * @return
+	 * Returns the width of the level.
+	 *
+	 * @return the width of the level
 	 */
 	int width() {
 		return cells.length;
 	}
 
 	/**
-	 * @return
+	 * Returns the height of the level.
+	 *
+	 * @return the height of the level
 	 */
 	int height() {
 		return cells[0].length;
 	}
 
 	/**
-	 * @param pt
+	 * Defines a new wall.
+	 *
+	 * @param pt the wall coordinates
 	 */
 	void setWall(Point pt) {
 		setContent(pt, Content.Wall);
 	}
 
 	/**
-	 * @param pt
+	 * Defines a new crate.
+	 *
+	 * @param pt the crate coordinates
 	 */
 	void setCrate(Point pt) {
 		setContent(pt, Content.Crate);
 	}
 
 	/**
-	 * @param pt
+	 * Sets the player starting point.
+	 *
+	 * @param pt the player starting point
 	 */
 	void setPlayer(Point pt) {
 		px = pt.getX();
@@ -126,22 +161,26 @@ class Level {
 	}
 
 	/**
-	 * @param pt
+	 * Sets a new target cell.
+	 *
+	 * @param pt the target cell coordinates
 	 */
 	void setTarget(Point pt) {
 		cells[pt.getX()][pt.getY()].target = true;
 	}
 
 	/**
-	 * @param pt
-	 * @param content
+	 * Sets the content of a cell.
+	 *
+	 * @param pt      the coordinates of the cell
+	 * @param content the content to put in the cell
 	 */
 	private void setContent(Point pt, Content content) {
 		cells[pt.getX()][pt.getY()].content = content;
 	}
 
 	/**
-	 *
+	 * Rewind the last action from the history.
 	 */
 	void rewind() {
 		if (!rewind.empty()) {
@@ -150,7 +189,9 @@ class Level {
 	}
 
 	/**
-	 * @return
+	 * Checks if the level is done.
+	 *
+	 * @return true if the level is done
 	 */
 	boolean done() {
 		for (Cell[] col : cells) {
@@ -162,37 +203,47 @@ class Level {
 	}
 
 	/**
-	 * @return
+	 * Moves up.
+	 *
+	 * @return a list of coordinates of cells affected by the move
 	 */
 	List<Point> up() {
 		return move(0, -1);
 	}
 
 	/**
-	 * @return
+	 * Moves right.
+	 *
+	 * @return a list of coordinates of cells affected by the move
 	 */
 	List<Point> right() {
 		return move(1, 0);
 	}
 
 	/**
-	 * @return
+	 * Moves down.
+	 *
+	 * @return a list of coordinates of cells affected by the move
 	 */
 	List<Point> down() {
 		return move(0, 1);
 	}
 
 	/**
-	 * @return
+	 * Moves left.
+	 *
+	 * @return a list of coordinates of cells affected by the move
 	 */
 	List<Point> left() {
 		return move(-1, 0);
 	}
 
 	/**
-	 * @param dx
-	 * @param dy
-	 * @return
+	 * Moves.
+	 *
+	 * @param dx movement on the x-axis
+	 * @param dy movement on the y-axis
+	 * @return a list of coordinates of cells affected by the move
 	 */
 	private List<Point> move(int dx, int dy) {
 		List<Point> altered = new ArrayList<>(3);

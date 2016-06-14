@@ -15,6 +15,9 @@ import java.util.function.Function;
 
 import static sokonet.telnet.TelnetOpcode.*;
 
+/**
+ * A telnet client thread.
+ */
 class TelnetHandler implements Runnable {
 	private Socket socket;
 	private Function<? super TelnetDisplay, Game> factory;
@@ -24,6 +27,13 @@ class TelnetHandler implements Runnable {
 	private TelnetDisplay display;
 	private Game game;
 
+	/**
+	 * Constructs a new TelnetHandler.
+	 *
+	 * @param socket  the client socket
+	 * @param factory the game factory
+	 * @throws IOException
+	 */
 	TelnetHandler(Socket socket, Function<? super TelnetDisplay, Game> factory) throws IOException {
 		this.socket = socket;
 		this.factory = factory;
@@ -33,11 +43,17 @@ class TelnetHandler implements Runnable {
 		display = new TelnetDisplay(out);
 	}
 
+	/**
+	 * Starts the game.
+	 */
 	private synchronized void startGame() {
 		if (game != null) return;
 		game = factory.apply(display);
 	}
 
+	/**
+	 * Main client thread.
+	 */
 	@Override
 	public void run() {
 		// Timeout if remove does not perform window size negotiation
@@ -109,12 +125,23 @@ class TelnetHandler implements Runnable {
 		}
 	}
 
+	/**
+	 * Sends a telnet command to the client.
+	 *
+	 * @param ops the list of telnet opcodes to write
+	 * @throws IOException
+	 */
 	private void command(TelnetOpcode... ops) throws IOException {
 		out.write(IAC.code);
 		for (TelnetOpcode o : ops) out.write(o.code);
 		out.flush();
 	}
 
+	/**
+	 * Reads a telnet command.
+	 *
+	 * @throws IOException
+	 */
 	private void readCommand() throws IOException {
 		int code = in.read();
 		switch (TelnetOpcode.fromByte(code)) {
