@@ -107,7 +107,11 @@ public class Sokoban implements Game {
 				renderer.setStatus("");
 				renderer.drawLevel(delta);
 				if (level.done()) {
-					selectLevel(levelIndex + 1);
+					if (levelIndex + 1 >= LevelFactory.getNumLevels()) {
+						selectLevel(0);
+					} else {
+						selectLevel(levelIndex + 1);
+					}
 					renderer.setStatus("Congratulation, you solved level #" + levelIndex);
 				}
 				if (historyDx < 0)
