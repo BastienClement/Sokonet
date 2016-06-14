@@ -155,9 +155,12 @@ public abstract class AnsiDisplay implements Display {
 	}
 
 	/**
-	 * TODO
+	 * Executes a runnable block of code atomically.
+	 * <p>
+	 * All writes operations will be buffered until the end of the runnable
+	 * block and written as one operation at the end.
 	 *
-	 * @param block
+	 * @param block the block of code to run
 	 */
 	public void atomically(Runnable block) {
 		StringBuilder old = buffer;

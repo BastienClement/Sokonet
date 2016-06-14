@@ -1,5 +1,8 @@
 package sokonet;
 
+/**
+ * A keyboard modifier.
+ */
 public enum Modifier {
 	NONE(""), SHIFT("SHIFT-"), CTRL("CTRL-");
 
