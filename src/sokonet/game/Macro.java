@@ -35,4 +35,9 @@ class Macro implements Command {
 		cmds[cmds.length - 1] = cmd;
 		return new Macro(cmds);
 	}
+
+	@Override
+	public String toString() {
+		return "[MACRO]";
+	}
 }

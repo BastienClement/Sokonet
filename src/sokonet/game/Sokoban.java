@@ -60,10 +60,10 @@ public class Sokoban implements Game {
 				renderer.sync();
 			}
 		}));
-		defaultBindings.set(Key.M, this::startRecording);
-		defaultBindings.set(Key.H, () -> {
-			renderer.setStatus("Move: W A S D, Undo: Z, Reset: R, Nav: O P, Quit: ^C");
-		});
+		defaultBindings.set(Key.M, Command.named("MACRO", this::startRecording));
+		defaultBindings.set(Key.H, Command.named("HELP", () -> {
+			renderer.setStatus("Move: W A S D, Undo: Z, Reset: R, Nav: O P, Macro: M, Quit: ^C");
+		}));
 
 		protectedKeys = new HashSet<>();
 		protectedKeys.addAll(defaultBindings.boundKeys());
