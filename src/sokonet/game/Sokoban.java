@@ -103,9 +103,20 @@ public class Sokoban implements Game {
 	private Command performMovement(String name, Function<Level, List<Point>> move) {
 		return Command.named(name, () -> {
 			try {
+				// Move
 				List<Point> delta = move.apply(level);
 				renderer.setStatus("");
 				renderer.drawLevel(delta);
+
+				// Rewind history
+				if (historyDx < 0) {
+					history = history.substring(0, history.length() + historyDx);
+				}
+				history = history + name;
+				historyDx = 0;
+				renderer.setHistory(history, historyDx);
+
+				// Check completion
 				if (level.done()) {
 					if (levelIndex + 1 >= LevelFactory.getNumLevels()) {
 						selectLevel(0);
@@ -114,11 +125,6 @@ public class Sokoban implements Game {
 					}
 					renderer.setStatus("Congratulation, you solved level #" + levelIndex);
 				}
-				if (historyDx < 0)
-					history = history.substring(0, history.length() + historyDx);
-				history = history + name;
-				historyDx = 0;
-				renderer.setHistory(history, historyDx);
 			} catch (IllegalStateException ex) {
 				renderer.setStatus(ex.getMessage());
 			}
