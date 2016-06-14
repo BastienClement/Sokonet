@@ -69,7 +69,7 @@ class Renderer {
 	void drawLevel(List<Point> delta) {
 		game.level().ifPresent(level -> display.atomically(() -> {
 			int baseX = display.width() / 2 - level.width() + 1;
-			int baseY = (display.height() - 2) / 2 - level.height() / 2 + 1;
+			int baseY = (display.height() - 4) / 2 - level.height() / 2 + 1;
 
 			levelCursorX = levelCursorY = -1;
 			levelColor = Attribute.BlackBackground;
