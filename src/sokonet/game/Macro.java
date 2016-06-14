@@ -18,7 +18,7 @@ class Macro implements Command {
 
 	private Command[] commands;
 
-	private Macro(Command... commands) {
+	Macro(Command... commands) {
 		this.commands = commands;
 	}
 

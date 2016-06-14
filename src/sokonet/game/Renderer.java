@@ -84,6 +84,8 @@ class Renderer {
 			} else {
 				delta.forEach(pt -> drawLevelCell(level, pt.getX(), pt.getY(), baseX, baseY));
 			}
+
+			display.setCursor(display.height(), display.width());
 		}));
 	}
 
