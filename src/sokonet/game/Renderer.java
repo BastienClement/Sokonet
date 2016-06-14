@@ -5,29 +5,47 @@ import sokonet.ansi.Attribute;
 import sokonet.ansi.ClearLineDirection;
 import sokonet.ansi.ClearScreenDirection;
 
-import java.util.Collections;
 import java.util.List;
 
+/**
+ * Game renderer.
+ * Handles everything drawing related.
+ */
 class Renderer {
 	private Sokoban game;
 	private AnsiDisplay display;
 
 	private String statusText = "Hello, world!";
 	private String statusRightText = "Sokonet 1.0";
-	private Attribute[] statusAttributes = new Attribute[] { Attribute.WhiteBackground, Attribute.BlackColor};
+	private Attribute[] statusAttributes = new Attribute[]{Attribute.WhiteBackground, Attribute.BlackColor};
+
 	private String history = ".";
 	private int historyDx = 0;
-	private Attribute[] historyAttributes = new Attribute[] { Attribute.WhiteBackground, Attribute.BlackColor};
+	private Attribute[] historyAttributes = new Attribute[]{Attribute.WhiteBackground, Attribute.BlackColor};
 
 	private int levelCursorX, levelCursorY;
 	private Attribute levelColor;
 
+	/**
+	 * Constructs a new renderer for the given game, using the given display.
+	 *
+	 * @param game    the game to render
+	 * @param display the display to use
+	 */
 	Renderer(Sokoban game, AnsiDisplay display) {
 		this.game = game;
 		this.display = display;
 		sync();
 	}
 
+	/**
+	 * Limits the legnth of a string.
+	 *
+	 * @param in     the string to limit
+	 * @param length the max length of the string
+	 * @return the given string if not longer than length, a substring of
+	 * the requested length otherwise.
+	 */
 	private String limit(String in, int length) {
 		if (in.length() > length) {
 			return in.substring(0, length);
@@ -36,10 +54,18 @@ class Renderer {
 		}
 	}
 
+	/**
+	 * Draws the level.
+	 */
 	private void drawLevel() {
-		drawLevel(Collections.emptyList());
+		drawLevel(null);
 	}
 
+	/**
+	 * Draws the altered cells from a level.
+	 *
+	 * @param delta the list of altered cells
+	 */
 	void drawLevel(List<Point> delta) {
 		game.level().ifPresent(level -> display.atomically(() -> {
 			int baseX = display.width() / 2 - level.width() + 1;
@@ -49,7 +75,7 @@ class Renderer {
 			levelColor = Attribute.BlackBackground;
 			display.setAttribute(Attribute.BlackBackground, Attribute.BlackColor, Attribute.Bold);
 
-			if (delta.isEmpty()) {
+			if (delta == null) {
 				for (int y = 0; y < level.height(); y++) {
 					for (int x = 0; x < level.width(); x++) {
 						drawLevelCell(level, x, y, baseX, baseY);
@@ -61,6 +87,15 @@ class Renderer {
 		}));
 	}
 
+	/**
+	 * Draws a level cell.
+	 *
+	 * @param level the level
+	 * @param x     the cell x coordinate
+	 * @param y     the cell y coordinate
+	 * @param baseX the base x coordinate for the drawing
+	 * @param baseY the base y coordinate for the drawing
+	 */
 	private void drawLevelCell(Level level, int x, int y, int baseX, int baseY) {
 		int drawX = baseX + x * 2;
 		int drawY = baseY + y;
@@ -103,6 +138,9 @@ class Renderer {
 		levelCursorY = drawY;
 	}
 
+	/**
+	 * Draws the status bar.
+	 */
 	private void drawStatus() {
 		display.atomically(() -> {
 			int status_row = display.height() - 1;
@@ -133,6 +171,9 @@ class Renderer {
 		});
 	}
 
+	/**
+	 * Draws the history.
+	 */
 	private void drawHistory() {
 		display.atomically(() -> {
 			int history_row = display.height() - 3;
@@ -143,12 +184,10 @@ class Renderer {
 			if (buffer.length() > history_width) {
 				if (-dx < history_width / 2) {
 					buffer = "..." + buffer.substring(buffer.length() - history_width + 3);
-				}
-				else if (buffer.length() + dx < history_width / 2) {
+				} else if (buffer.length() + dx < history_width / 2) {
 					dx = -(history_width - (buffer.length() + dx));
 					buffer = buffer.substring(0, history_width - 3) + "...";
-				}
-				else {
+				} else {
 					int tmp = buffer.length() + dx - (history_width / 2 - 3);
 					buffer = "..." + buffer.substring(tmp, tmp + history_width - 6) + "...";
 					dx = -(history_width / 2);
@@ -177,11 +216,21 @@ class Renderer {
 		});
 	}
 
-	void setStatusAttribtues(Attribute... attribtues) {
-		statusAttributes = attribtues;
+	/**
+	 * Sets display attributes for the status bar.
+	 *
+	 * @param attributes display attributes for the status bar
+	 */
+	void setStatusAttribtues(Attribute... attributes) {
+		statusAttributes = attributes;
 		drawStatus();
 	}
 
+	/**
+	 * Sets the main status text.
+	 *
+	 * @param text the status text to display
+	 */
 	void setStatus(String text) {
 		if (!text.equals(statusText)) {
 			statusText = text;
@@ -189,6 +238,11 @@ class Renderer {
 		}
 	}
 
+	/**
+	 * Sets the right status text.
+	 *
+	 * @param text the right status text to display
+	 */
 	void setStatusRight(String text) {
 		if (!text.equals(statusRightText)) {
 			statusRightText = text;
@@ -196,6 +250,12 @@ class Renderer {
 		}
 	}
 
+	/**
+	 * Sets history data.
+	 *
+	 * @param text the history text
+	 * @param dx   the history cursor position
+	 */
 	void setHistory(String text, int dx) {
 		if (!text.equals(history) || historyDx != dx) {
 			history = text;
@@ -204,6 +264,9 @@ class Renderer {
 		}
 	}
 
+	/**
+	 * Clears and redraw the screen.
+	 */
 	void sync() {
 		display.atomically(() -> {
 			display.setAttribute(Attribute.Reset);
@@ -212,7 +275,7 @@ class Renderer {
 			drawLevel();
 			drawHistory();
 			drawStatus();
-			display.flush();
 		});
+		display.flush();
 	}
 }

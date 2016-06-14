@@ -2,14 +2,23 @@ package sokonet.game;
 
 import java.util.Arrays;
 
+/**
+ * A compound command.
+ */
 class Macro implements Command {
+	/**
+	 * Builds a new macro from the given commands.
+	 *
+	 * @param commands the commands to run with this macro
+	 * @return a new macro executing the given commands
+	 */
 	public static Macro of(Command... commands) {
 		return new Macro(Arrays.copyOf(commands, commands.length));
 	}
 
 	private Command[] commands;
 
-	Macro(Command... commands) {
+	private Macro(Command... commands) {
 		this.commands = commands;
 	}
 
